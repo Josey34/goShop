@@ -10,10 +10,10 @@ import (
 )
 
 type ProductRepo struct {
-	db *sql.DB
+	db DBTX
 }
 
-func NewProductRepo(db *sql.DB) *ProductRepo {
+func NewProductRepo(db DBTX) *ProductRepo {
 	return &ProductRepo{
 		db: db,
 	}
