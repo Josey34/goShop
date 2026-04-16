@@ -11,6 +11,9 @@ type Config struct {
 	App AppConfig
 	DB  DBConfig
 	JWT JWTConfig
+	S3  S3Config
+	SQS SQSConfig
+	AWS AWSConfig
 }
 
 type AppConfig struct {
@@ -42,6 +45,18 @@ func Load() (*Config, error) {
 			Secret: getEnv("JWT_SECRET", "secret"),
 			Expiry: getEnvInt("JWT_EXPIRY", 24),
 		},
+		S3: S3Config{
+			Endpoint:   getEnv("S3_ENDPOINT", ""),
+			BucketName: getEnv("S3_BUCKET_NAME", ""),
+			Region:     getEnv("S3_REGION", "us-east-1"),
+		},
+		SQS: SQSConfig{
+			Endpoint: getEnv("SQS_ENDPOINT", ""),
+			QueueURL: getEnv("SQS_QUEUE_URL", ""),
+		},
+		AWS: AWSConfig{
+			Region: getEnv("AWS_REGION", "us-east-1"),
+		},
 	}, nil
 }
 
@@ -60,4 +75,19 @@ func getEnvInt(key string, defaultVal int) int {
 		}
 	}
 	return defaultVal
+}
+
+type S3Config struct {
+	Endpoint   string
+	BucketName string
+	Region     string
+}
+
+type SQSConfig struct {
+	Endpoint string
+	QueueURL string
+}
+
+type AWSConfig struct {
+	Region string
 }
