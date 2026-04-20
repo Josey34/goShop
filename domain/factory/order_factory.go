@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Josey34/goshop/domain/entity"
+	"github.com/Josey34/goshop/domain/event"
 	"github.com/Josey34/goshop/domain/valueobject"
 )
 
@@ -21,10 +22,6 @@ type CreateOrderItemInput struct {
 }
 
 func NewOrder(id string, input CreateOrderInput) (*entity.Order, error) {
-	if input.Items == nil {
-		return nil, fmt.Errorf("order must have at least one item")
-	}
-
 	if len(input.Items) == 0 {
 		return nil, fmt.Errorf("order must have at least one item")
 	}
@@ -51,5 +48,8 @@ func NewOrder(id string, input CreateOrderInput) (*entity.Order, error) {
 	}
 
 	order.CalculateTotal()
+
+	order.AddEvent(event.NewOrderCreated(id, input.CustomerID, order.Total.Value()))
+
 	return order, nil
 }

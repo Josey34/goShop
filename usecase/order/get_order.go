@@ -11,7 +11,7 @@ type GetOrderUseCase struct {
 	orderRepo repository.OrderRepository
 }
 
-func NewGetProductUseCase(repo repository.OrderRepository) *GetOrderUseCase {
+func NewGetOrderUseCase(repo repository.OrderRepository) *GetOrderUseCase {
 	return &GetOrderUseCase{orderRepo: repo}
 }
 

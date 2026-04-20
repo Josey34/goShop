@@ -37,7 +37,7 @@ func (r *OrderRepo) FindByID(ctx context.Context, id string) (*entity.Order, err
 	return o, nil
 }
 
-func (r *OrderRepo) FindByCustomerID(ctx context.Context, customerID string, pagination valueobject.Pagination) ([]*entity.Order, error) {
+func (r *OrderRepo) FindByCustomer(ctx context.Context, customerID string, pagination valueobject.Pagination) ([]*entity.Order, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 

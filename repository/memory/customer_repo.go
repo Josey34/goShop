@@ -55,7 +55,7 @@ func (r *CustomerRepo) ExistsByEmail(ctx context.Context, email string) (bool, e
 
 	for _, c := range r.customers {
 		if c.Email.Value() == email {
-			return false, nil
+			return true, nil
 		}
 	}
 	return false, nil

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/Josey34/goshop/domain/errors"
+	"github.com/Josey34/goshop/domain/event"
 	"github.com/Josey34/goshop/domain/valueobject"
 )
 
@@ -15,6 +16,7 @@ type Order struct {
 	Status     valueobject.OrderStatus
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+	events     []event.DomainEvent
 }
 
 func (o *Order) CalculateTotal() {
@@ -36,4 +38,16 @@ func (o *Order) TransitionTo(next valueobject.OrderStatus) error {
 	o.UpdatedAt = time.Now()
 
 	return nil
+}
+
+func (o *Order) AddEvent(e event.DomainEvent) {
+	o.events = append(o.events, e)
+}
+
+func (o *Order) PullEvents() []event.DomainEvent {
+	events := o.events
+
+	o.events = nil
+
+	return events
 }
