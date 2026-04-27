@@ -10,7 +10,9 @@ type IDGenerator interface {
 
 type UUIDGenerator struct{}
 
-func NewUUIDGenerator() *UUIDGenerator
+func NewUUIDGenerator() *UUIDGenerator {
+	return &UUIDGenerator{}
+}
 
 func (g *UUIDGenerator) Generate() string {
 	return uuid.New().String()
