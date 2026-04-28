@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Runtime: provided.al2023
+    Architectures: [x86_64]
+
+Resources:
+  ValidateOrderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: delivery/lambda/validate_order/
+      Handler: bootstrap
+    Metadata:
+      BuildMethod: go1.x
+
+  CalculateTotalFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: delivery/lambda/calculate_total/
+      Handler: bootstrap
+    Metadata:
+      BuildMethod: go1.x
+
+  ProcessPaymentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: delivery/lambda/process_payment/
+      Handler: bootstrap
+    Metadata:
+      BuildMethod: go1.x
+
+  FulfillOrderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: delivery/lambda/fulfill_order/
+      Handler: bootstrap
+    Metadata:
+      BuildMethod: go1.x
+
+  SendNotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: delivery/lambda/send_notification/
+      Handler: bootstrap
+    Metadata:
+      BuildMethod: go1.x
