@@ -18,7 +18,7 @@ func (h *Handler) Handle(ctx context.Context, event CalculateTotalEvent) (Calcul
 	o, err := h.getOrderUC.Execute(ctx, event.OrderID)
 
 	if err != nil {
-		return CalculateTotalResponse{}, nil
+		return CalculateTotalResponse{}, err
 	}
 
 	subtotal := o.Total.Value()

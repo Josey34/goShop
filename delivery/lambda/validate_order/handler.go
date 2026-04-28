@@ -21,7 +21,7 @@ func (h *Handler) Handle(ctx context.Context, event ValidateOrderEvent) (Validat
 			OrderID: event.OrderID,
 			IsValid: false,
 			Errors:  []string{err.Error()},
-		}, nil
+		}, err
 	}
 	if len(o.Items) == 0 {
 		return ValidateOrderResponse{OrderID: event.OrderID, IsValid: false, Errors: []string{"no items"}}, nil
