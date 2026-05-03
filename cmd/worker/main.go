@@ -6,8 +6,10 @@ import (
 
 	"github.com/Josey34/goshop/config"
 	"github.com/Josey34/goshop/delivery/worker"
+	"github.com/Josey34/goshop/usecase/order"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sfn"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 )
 
@@ -28,7 +30,18 @@ func main() {
 	}
 
 	sqsClient := sqs.NewFromConfig(awsCfg)
-	consumer := worker.NewConsumer(sqsClient, cfg.SQS.QueueURL, worker.HandleOrderMessage)
+	sfnClient := sfn.NewFromConfig(awsCfg)
+	workflow := order.NewStartOrderWorkflow(sfnClient)
+	handler := worker.NewOrderMessageHandler(
+		workflow,
+		"arn:aws:lambda:us-east-1:000000000000:function:ValidateOrderFunction",
+		"arn:aws:lambda:us-east-1:000000000000:function:CalculateTotalFunction",
+		"arn:aws:lambda:us-east-1:000000000000:function:ProcessPaymentFunction",
+		"arn:aws:lambda:us-east-1:000000000000:function:FulfillOrderFunction",
+		"arn:aws:lambda:us-east-1:000000000000:function:SendNotificationFunction",
+		"arn:aws:states:us-east-1:000000000000:stateMachine:OrderWorkflow",
+	)
+	consumer := worker.NewConsumer(sqsClient, cfg.SQS.QueueURL, handler)
 
 	if err := consumer.Start(context.Background()); err != nil {
 		log.Fatal(err)
