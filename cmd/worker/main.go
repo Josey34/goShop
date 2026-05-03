@@ -21,7 +21,7 @@ func main() {
 
 	awsCfg, err := awsConfig.LoadDefaultConfig(context.Background(),
 		awsConfig.WithRegion(cfg.AWS.Region),
-		awsConfig.WithEndpointResolver(aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
+		awsConfig.WithEndpointResolver(aws.EndpointResolverFunc(func(svc, region string) (aws.Endpoint, error) {
 			return aws.Endpoint{URL: cfg.SQS.Endpoint}, nil
 		})),
 	)
@@ -43,6 +43,7 @@ func main() {
 	)
 	consumer := worker.NewConsumer(sqsClient, cfg.SQS.QueueURL, handler)
 
+	log.Printf("[worker] starting, polling queue: %s", cfg.SQS.QueueURL)
 	if err := consumer.Start(context.Background()); err != nil {
 		log.Fatal(err)
 	}

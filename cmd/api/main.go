@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 
+	"context"
+
 	"github.com/Josey34/goshop/config"
 	"github.com/Josey34/goshop/database"
 	httpdelivery "github.com/Josey34/goshop/delivery/http"
@@ -12,10 +14,14 @@ import (
 	"github.com/Josey34/goshop/pkg/idgen"
 	"github.com/Josey34/goshop/pkg/jwt"
 	"github.com/Josey34/goshop/repository/memory"
+	"github.com/Josey34/goshop/repository/sqs"
 	"github.com/Josey34/goshop/service"
 	"github.com/Josey34/goshop/usecase/auth"
 	"github.com/Josey34/goshop/usecase/order"
 	"github.com/Josey34/goshop/usecase/product"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	awssqs "github.com/aws/aws-sdk-go-v2/service/sqs"
 )
 
 func main() {
@@ -36,19 +42,28 @@ func main() {
 	idGen := idgen.NewUUIDGenerator()
 	pwHasher := hasher.NewBcryptHasher()
 	jwtSvc := jwt.NewJWTService(cfg.JWT.Secret, cfg.JWT.Expiry)
+	awsCfg, err := awsConfig.LoadDefaultConfig(context.Background(),
+		awsConfig.WithRegion(cfg.AWS.Region),
+		awsConfig.WithEndpointResolver(aws.EndpointResolverFunc(func(svc, region string) (aws.Endpoint, error) {
+			return aws.Endpoint{URL: cfg.SQS.Endpoint}, nil
+		})),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	sqsClient := awssqs.NewFromConfig(awsCfg)
+	sqsQueue := sqs.NewOrderQueue(sqsClient, cfg.SQS.QueueURL)
 
 	productRepo := memory.NewProductRepo()
 	orderRepo := memory.NewOrderRepo()
 	customerRepo := memory.NewCustomerRepo()
-	orderQueue := memory.NewOrderQueue()
-
 	createProductUC := product.NewCreateProductUseCase(productRepo, idGen)
 	getProductUC := product.NewGetProductUseCase(productRepo)
 	listProductUC := product.NewListProductUseCase(productRepo)
 	updateProductUC := product.NewUpdateProductUseCase(productRepo)
 	deleteProductUC := product.NewDeleteProductUseCase(productRepo)
 
-	createOrderUC := order.NewCreateOrderUseCase(orderRepo, productRepo, orderQueue, idGen)
+	createOrderUC := order.NewCreateOrderUseCase(orderRepo, productRepo, idGen)
 	getOrderUC := order.NewGetOrderUseCase(orderRepo)
 	listOrderUC := order.NewListProductUseCase(orderRepo)
 	updateOrderUC := order.NewUpdateOrderStatusUseCase(orderRepo)
@@ -57,7 +72,7 @@ func main() {
 	registerUC := auth.NewRegisterUseCase(customerRepo, pwHasher, idGen)
 
 	productSvc := service.NewProductService(createProductUC, getProductUC, listProductUC, updateProductUC, deleteProductUC)
-	orderSvc := service.NewOrderService(createOrderUC, getOrderUC, listOrderUC, updateOrderUC)
+	orderSvc := service.NewOrderService(createOrderUC, getOrderUC, listOrderUC, updateOrderUC, sqsQueue)
 	authSvc := service.NewAuthService(registerUC, loginUC, jwtSvc)
 
 	productH := handler.NewProductHandler(productSvc)

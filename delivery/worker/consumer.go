@@ -34,9 +34,11 @@ func (c *Consumer) Start(ctx context.Context) error {
 			return err
 		}
 
+		log.Printf("[consumer] received %d messages", len(result.Messages))
+
 		for _, msg := range result.Messages {
 			if err := c.handler(ctx, *msg.Body); err != nil {
-				log.Printf("error handling message: %v", err)
+				log.Printf("[consumer] error handling message: %v", err)
 				continue
 			}
 
@@ -44,6 +46,7 @@ func (c *Consumer) Start(ctx context.Context) error {
 				QueueUrl:      &c.queueURL,
 				ReceiptHandle: msg.ReceiptHandle,
 			})
+			log.Printf("[consumer] message deleted from queue")
 		}
 	}
 }

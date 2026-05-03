@@ -6,6 +6,7 @@ import (
 
 	"github.com/Josey34/goshop/domain/entity"
 	"github.com/Josey34/goshop/domain/valueobject"
+	"github.com/Josey34/goshop/repository"
 	ucorder "github.com/Josey34/goshop/usecase/order"
 )
 
@@ -14,6 +15,7 @@ type OrderService struct {
 	getUC          *ucorder.GetOrderUseCase
 	listUC         *ucorder.ListOrderUseCase
 	updateStatusUC *ucorder.UpdateOrderUseCase
+	queue          repository.OrderQueueRepository
 }
 
 func NewOrderService(
@@ -21,8 +23,9 @@ func NewOrderService(
 	getUC *ucorder.GetOrderUseCase,
 	listUC *ucorder.ListOrderUseCase,
 	updateStatusUC *ucorder.UpdateOrderUseCase,
+	queue repository.OrderQueueRepository,
 ) *OrderService {
-	return &OrderService{createUC, getUC, listUC, updateStatusUC}
+	return &OrderService{createUC, getUC, listUC, updateStatusUC, queue}
 }
 
 func (s *OrderService) CreateOrder(ctx context.Context, input ucorder.CreateOrderInput) (*entity.Order, error) {
@@ -33,6 +36,10 @@ func (s *OrderService) CreateOrder(ctx context.Context, input ucorder.CreateOrde
 
 	for _, e := range order.PullEvents() {
 		log.Printf("[event] %s", e.EventName())
+	}
+
+	if err := s.queue.Enqueue(ctx, order); err != nil {
+		log.Printf("[event] failed to enqueue order: %v", err)
 	}
 
 	return order, nil

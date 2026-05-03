@@ -17,15 +17,13 @@ type CreateOrderInput struct {
 type CreateOrderUseCase struct {
 	orderRepo   repository.OrderRepository
 	productRepo repository.ProductRepository
-	orderQueue  repository.OrderQueueRepository
 	idGen       idgen.IDGenerator
 }
 
-func NewCreateOrderUseCase(orderRepo repository.OrderRepository, productRepo repository.ProductRepository, orderQueue repository.OrderQueueRepository, idGen idgen.IDGenerator) *CreateOrderUseCase {
+func NewCreateOrderUseCase(orderRepo repository.OrderRepository, productRepo repository.ProductRepository, idGen idgen.IDGenerator) *CreateOrderUseCase {
 	return &CreateOrderUseCase{
 		orderRepo:   orderRepo,
 		productRepo: productRepo,
-		orderQueue:  orderQueue,
 		idGen:       idGen,
 	}
 }
@@ -63,10 +61,6 @@ func (uc *CreateOrderUseCase) Execute(ctx context.Context, input CreateOrderInpu
 	}
 
 	if err := uc.orderRepo.Create(ctx, order); err != nil {
-		return nil, err
-	}
-
-	if err := uc.orderQueue.Enqueue(ctx, order); err != nil {
 		return nil, err
 	}
 
