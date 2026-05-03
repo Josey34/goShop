@@ -21,5 +21,11 @@ aws --endpoint-url=$ENDPOINT sqs create-queue \
   --queue-name goshop-orders \
   --attributes "{\"RedrivePolicy\":\"{\\\"deadLetterTargetArn\\\":\\\"$DLQ_ARN\\\",\\\"maxReceiveCount\\\":\\\"3\\\"}\"}" \
   --region $REGION
+  
+aws --endpoint-url=$ENDPOINT stepfunctions create-state-machine \
+  --name "OrderWorkflow" \
+  --definition "$(cat order-workflow.asl.json)" \
+  --role-arn "arn:aws:iam::000000000000:role/LocalStackRole" \
+  --region $REGION
 
 echo "Done."

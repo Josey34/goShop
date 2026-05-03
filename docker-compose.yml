@@ -6,11 +6,12 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3,sqs
+      - SERVICES=s3,sqs,stepfunctions
       - DEFAULT_REGION=ap-southeast-1
       - AWS_DEFAULT_REGION=ap-southeast-1
     volumes:
       - localstack_data:/var/lib/localstack
+      - ./order-workflow.asl.json:/app/order-workflow.asl.json
 
 volumes:
-  localstack_data:
+  localstack_data: 

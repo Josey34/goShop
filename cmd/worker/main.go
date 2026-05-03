@@ -34,12 +34,12 @@ func main() {
 	workflow := order.NewStartOrderWorkflow(sfnClient)
 	handler := worker.NewOrderMessageHandler(
 		workflow,
-		"arn:aws:lambda:us-east-1:000000000000:function:ValidateOrderFunction",
-		"arn:aws:lambda:us-east-1:000000000000:function:CalculateTotalFunction",
-		"arn:aws:lambda:us-east-1:000000000000:function:ProcessPaymentFunction",
-		"arn:aws:lambda:us-east-1:000000000000:function:FulfillOrderFunction",
-		"arn:aws:lambda:us-east-1:000000000000:function:SendNotificationFunction",
-		"arn:aws:states:us-east-1:000000000000:stateMachine:OrderWorkflow",
+		"arn:aws:lambda:ap-southeast-1:000000000000:function:ValidateOrderFunction",
+		"arn:aws:lambda:ap-southeast-1:000000000000:function:CalculateTotalFunction",
+		"arn:aws:lambda:ap-southeast-1:000000000000:function:ProcessPaymentFunction",
+		"arn:aws:lambda:ap-southeast-1:000000000000:function:FulfillOrderFunction",
+		"arn:aws:lambda:ap-southeast-1:000000000000:function:SendNotificationFunction",
+		"arn:aws:states:ap-southeast-1:000000000000:stateMachine:OrderWorkflow",
 	)
 	consumer := worker.NewConsumer(sqsClient, cfg.SQS.QueueURL, handler)
 

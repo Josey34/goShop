@@ -1,0 +1,95 @@
+{
+  "Comment": "Order processing workflow",
+  "StartAt": "ValidateOrder",
+  "States": {
+    "ValidateOrder": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName.$": "$.ValidateOrderFunctionArn",
+        "Payload.$": "$.order"
+      },
+      "ResultPath": "$.validateResult",
+      "Next": "CheckValidation"
+    },
+    "CheckValidation": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.validateResult.Payload.Valid",
+          "BooleanEquals": true,
+          "Next": "CalculateTotal"
+        }
+      ],
+      "Default": "ValidationFailed"
+    },
+    "CalculateTotal": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName.$": "$.CalculateTotalFunctionArn",
+        "Payload.$": "$.order"
+      },
+      "ResultPath": "$.calculateResult",
+      "Next": "ProcessPayment"
+    },
+    "ProcessPayment": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName.$": "$.ProcessPaymentFunctionArn",
+        "Payload": {
+          "OrderID.$": "$.order.ID",
+          "Amount.$": "$.calculateResult.Payload.Total"
+        }
+      },
+      "ResultPath": "$.paymentResult",
+      "Next": "CheckPayment"
+    },
+    "CheckPayment": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.paymentResult.Payload.Success",
+          "BooleanEquals": true,
+          "Next": "FulfillOrder"
+        }
+      ],
+      "Default": "PaymentFailed"
+    },
+    "FulfillOrder": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName.$": "$.FulfillOrderFunctionArn",
+        "Payload.$": "$.order"
+      },
+      "ResultPath": "$.fulfillResult",
+      "Next": "SendNotification"
+    },
+    "SendNotification": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName.$": "$.SendNotificationFunctionArn",
+        "Payload": {
+          "OrderID.$": "$.order.ID",
+          "CustomerID.$": "$.order.CustomerID",
+          "Message": "Your order has been processed successfully"
+        }
+      },
+      "ResultPath": "$.notificationResult",
+      "End": true
+    },
+    "ValidationFailed": {
+      "Type": "Fail",
+      "Error": "ValidationError",
+      "Cause": "Order validation failed"
+    },
+    "PaymentFailed": {
+      "Type": "Fail",
+      "Error": "PaymentError",
+      "Cause": "Payment processing failed"
+    }
+  }
+}
