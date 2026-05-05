@@ -48,14 +48,14 @@ func Load() (*Config, error) {
 		S3: S3Config{
 			Endpoint:   getEnv("S3_ENDPOINT", ""),
 			BucketName: getEnv("S3_BUCKET_NAME", ""),
-			Region:     getEnv("S3_REGION", " ap-southeast-1"),
+			Region:     getEnv("S3_REGION", "ap-southeast-1"),
 		},
 		SQS: SQSConfig{
 			Endpoint: getEnv("SQS_ENDPOINT", ""),
 			QueueURL: getEnv("SQS_QUEUE_URL", ""),
 		},
 		AWS: AWSConfig{
-			Region: getEnv("AWS_REGION", " ap-southeast-1"),
+			Region: getEnv("AWS_REGION", "ap-southeast-1"),
 		},
 	}, nil
 }
