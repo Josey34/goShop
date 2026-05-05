@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/Josey34/goshop/delivery/http/dto/mapper"
@@ -89,4 +90,34 @@ func (h *ProductHandler) Delete(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusNoContent)
+}
+
+func (h *ProductHandler) UploadImage(c *gin.Context) {
+	id := c.Param("id")
+	file, header, err := c.Request.FormFile("image")
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	contentType := header.Header.Get("Content-Type")
+
+	imageURL, err := h.service.UploadImage(c.Request.Context(), ucproduct.UploadProductImage{
+		ProductID:   id,
+		Data:        data,
+		ContentType: contentType,
+	})
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"image": imageURL})
 }

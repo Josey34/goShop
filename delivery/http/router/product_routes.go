@@ -11,4 +11,5 @@ func SetupProductRoutes(rg *gin.RouterGroup, h *handler.ProductHandler) {
 	rg.GET("/:id", h.GetByID)
 	rg.PUT("/:id", h.Update)
 	rg.DELETE("/:id", h.Delete)
+	rg.POST("/:id/image", h.UploadImage)
 }
