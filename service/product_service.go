@@ -14,6 +14,7 @@ type ProductService struct {
 	listUC   *ucproduct.ListProductsUseCase
 	updateUC *ucproduct.UpdateProductUseCase
 	deleteUC *ucproduct.DeleteProductUseCase
+	uploadUC *ucproduct.UploadProductImageUsecase
 }
 
 func NewProductService(
@@ -22,8 +23,9 @@ func NewProductService(
 	listUC *ucproduct.ListProductsUseCase,
 	updateUC *ucproduct.UpdateProductUseCase,
 	deleteUC *ucproduct.DeleteProductUseCase,
+	uploadUC *ucproduct.UploadProductImageUsecase,
 ) *ProductService {
-	return &ProductService{createUC, getUC, listUC, updateUC, deleteUC}
+	return &ProductService{createUC, getUC, listUC, updateUC, deleteUC, uploadUC}
 }
 
 func (s *ProductService) Create(ctx context.Context, input ucproduct.CreateProductInput) (*entity.Product, error) {
@@ -44,4 +46,8 @@ func (s *ProductService) Update(ctx context.Context, input ucproduct.UpdateProdu
 
 func (s *ProductService) Delete(ctx context.Context, id string) error {
 	return s.deleteUC.Execute(ctx, id)
+}
+
+func (s *ProductService) UploadImage(ctx context.Context, image ucproduct.UploadProductImage) (string, error) {
+	return s.uploadUC.Execute(ctx, image)
 }
