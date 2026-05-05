@@ -14,6 +14,7 @@ import (
 	"github.com/Josey34/goshop/pkg/idgen"
 	"github.com/Josey34/goshop/pkg/jwt"
 	"github.com/Josey34/goshop/repository/memory"
+	s3Repo "github.com/Josey34/goshop/repository/s3"
 	"github.com/Josey34/goshop/repository/sqs"
 	"github.com/Josey34/goshop/service"
 	"github.com/Josey34/goshop/usecase/auth"
@@ -21,6 +22,7 @@ import (
 	"github.com/Josey34/goshop/usecase/product"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	awss3 "github.com/aws/aws-sdk-go-v2/service/s3"
 	awssqs "github.com/aws/aws-sdk-go-v2/service/sqs"
 )
 
@@ -53,6 +55,8 @@ func main() {
 	}
 	sqsClient := awssqs.NewFromConfig(awsCfg)
 	sqsQueue := sqs.NewOrderQueue(sqsClient, cfg.SQS.QueueURL)
+	s3Client := awss3.NewFromConfig(awsCfg)
+	fileStorage := s3Repo.NewFileStorage(s3Client, cfg.S3.BucketName, cfg.AWS.Region)
 
 	productRepo := memory.NewProductRepo()
 	orderRepo := memory.NewOrderRepo()
@@ -62,6 +66,7 @@ func main() {
 	listProductUC := product.NewListProductUseCase(productRepo)
 	updateProductUC := product.NewUpdateProductUseCase(productRepo)
 	deleteProductUC := product.NewDeleteProductUseCase(productRepo)
+	uploadImageUC := product.NewUploadProductImageUsecase(productRepo, fileStorage)
 
 	createOrderUC := order.NewCreateOrderUseCase(orderRepo, productRepo, idGen)
 	getOrderUC := order.NewGetOrderUseCase(orderRepo)
@@ -71,7 +76,7 @@ func main() {
 	loginUC := auth.NewLoginUseCase(customerRepo, pwHasher)
 	registerUC := auth.NewRegisterUseCase(customerRepo, pwHasher, idGen)
 
-	productSvc := service.NewProductService(createProductUC, getProductUC, listProductUC, updateProductUC, deleteProductUC)
+	productSvc := service.NewProductService(createProductUC, getProductUC, listProductUC, updateProductUC, deleteProductUC, uploadImageUC)
 	orderSvc := service.NewOrderService(createOrderUC, getOrderUC, listOrderUC, updateOrderUC, sqsQueue)
 	authSvc := service.NewAuthService(registerUC, loginUC, jwtSvc)
 
