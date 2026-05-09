@@ -1,21 +1,32 @@
 package handler
 
 import (
+	"context"
 	"io"
 	"net/http"
 
 	"github.com/Josey34/goshop/delivery/http/dto/mapper"
 	"github.com/Josey34/goshop/delivery/http/dto/request"
-	"github.com/Josey34/goshop/service"
+	"github.com/Josey34/goshop/domain/entity"
+	"github.com/Josey34/goshop/domain/valueobject"
 	ucproduct "github.com/Josey34/goshop/usecase/product"
 	"github.com/gin-gonic/gin"
 )
 
-type ProductHandler struct {
-	service *service.ProductService
+type productService interface {
+	Create(ctx context.Context, input ucproduct.CreateProductInput) (*entity.Product, error)
+	GetByID(ctx context.Context, id string) (*entity.Product, error)
+	List(ctx context.Context, pagination valueobject.Pagination) ([]*entity.Product, error)
+	Update(ctx context.Context, input ucproduct.UpdateProductInput) (*entity.Product, error)
+	Delete(ctx context.Context, id string) error
+	UploadImage(ctx context.Context, image ucproduct.UploadProductImage) (string, error)
 }
 
-func NewProductHandler(svc *service.ProductService) *ProductHandler {
+type ProductHandler struct {
+	service productService
+}
+
+func NewProductHandler(svc productService) *ProductHandler {
 	return &ProductHandler{service: svc}
 }
 

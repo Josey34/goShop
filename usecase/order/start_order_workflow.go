@@ -8,14 +8,18 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sfn"
 )
 
+type sfnExecutor interface {
+	StartExecution(ctx context.Context, params *sfn.StartExecutionInput, optFns ...func(*sfn.Options)) (*sfn.StartExecutionOutput, error)
+}
+
 type StartOrderWorkflowInput struct {
-	Order                        *entity.Order
-	ValidateOrderArn             string
-	CalculateTotalArn            string
-	ProcessPaymentArn            string
-	FulfillOrderArn              string
-	SendNotificationFunctionArn  string
-	StateMachineArn              string
+	Order                       *entity.Order
+	ValidateOrderArn            string
+	CalculateTotalArn           string
+	ProcessPaymentArn           string
+	FulfillOrderArn             string
+	SendNotificationFunctionArn string
+	StateMachineArn             string
 }
 
 type StartOrderWorkflowOutput struct {
@@ -23,10 +27,10 @@ type StartOrderWorkflowOutput struct {
 }
 
 type StartOrderWorkflow struct {
-	stepFunctionsClient *sfn.Client
+	stepFunctionsClient sfnExecutor
 }
 
-func NewStartOrderWorkflow(stepFunctionsClient *sfn.Client) *StartOrderWorkflow {
+func NewStartOrderWorkflow(stepFunctionsClient sfnExecutor) *StartOrderWorkflow {
 	return &StartOrderWorkflow{
 		stepFunctionsClient: stepFunctionsClient,
 	}

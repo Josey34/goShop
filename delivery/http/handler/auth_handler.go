@@ -1,19 +1,26 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/Josey34/goshop/delivery/http/dto/mapper"
 	"github.com/Josey34/goshop/delivery/http/dto/request"
 	"github.com/Josey34/goshop/service"
+	ucauth "github.com/Josey34/goshop/usecase/auth"
 	"github.com/gin-gonic/gin"
 )
 
-type AuthHandler struct {
-	service *service.AuthService
+type authService interface {
+	Register(ctx context.Context, input ucauth.RegisterInput) error
+	Login(ctx context.Context, input ucauth.LoginInput) (*service.LoginOutput, error)
 }
 
-func NewAuthHandler(svc *service.AuthService) *AuthHandler {
+type AuthHandler struct {
+	service authService
+}
+
+func NewAuthHandler(svc authService) *AuthHandler {
 	return &AuthHandler{service: svc}
 }
 
