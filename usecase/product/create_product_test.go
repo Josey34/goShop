@@ -5,44 +5,16 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/Josey34/goshop/domain/entity"
-	"github.com/Josey34/goshop/domain/valueobject"
 	ucproduct "github.com/Josey34/goshop/usecase/product"
 )
 
-// --- mocks ---
-
-type mockProductRepo struct {
-	createErr error
-	created   *entity.Product
-}
-
-func (m *mockProductRepo) Create(ctx context.Context, p *entity.Product) error {
-	m.created = p
-	return m.createErr
-}
-func (m *mockProductRepo) FindByID(ctx context.Context, id string) (*entity.Product, error) {
-	return nil, nil
-}
-func (m *mockProductRepo) FindAll(ctx context.Context, pagination valueobject.Pagination) ([]*entity.Product, error) {
-	return nil, nil
-}
-func (m *mockProductRepo) Update(ctx context.Context, p *entity.Product) error { return nil }
-func (m *mockProductRepo) Delete(ctx context.Context, id string) error         { return nil }
-
-type mockIDGen struct{ id string }
-
-func (m *mockIDGen) Generate() string { return m.id }
-
-// --- tests ---
-
 func TestCreateProductUseCase_Execute(t *testing.T) {
 	cases := []struct {
-		name      string
-		input     ucproduct.CreateProductInput
-		repoErr   error
-		wantErr   bool
-		wantName  string
+		name     string
+		input    ucproduct.CreateProductInput
+		repoErr  error
+		wantErr  bool
+		wantName string
 	}{
 		{
 			name:     "valid product",
@@ -65,8 +37,7 @@ func TestCreateProductUseCase_Execute(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := &mockProductRepo{createErr: tc.repoErr}
-			idGen := &mockIDGen{id: "test-id"}
-			uc := ucproduct.NewCreateProductUseCase(repo, idGen)
+			uc := ucproduct.NewCreateProductUseCase(repo, &mockIDGen{id: "test-id"})
 
 			product, err := uc.Execute(context.Background(), tc.input)
 			if (err != nil) != tc.wantErr {
