@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Josey34/goshop/delivery/http/handler"
+	"github.com/Josey34/goshop/delivery/http/middleware"
 	"github.com/Josey34/goshop/domain/entity"
 	"github.com/Josey34/goshop/domain/valueobject"
 	ucproduct "github.com/Josey34/goshop/usecase/product"
@@ -45,6 +46,7 @@ func (m *mockProductService) UploadImage(ctx context.Context, image ucproduct.Up
 func setupRouter(h *handler.ProductHandler) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
+	r.Use(middleware.ErrorMiddleware())
 	r.POST("/products", h.Create)
 	r.GET("/products/:id", h.GetByID)
 	return r

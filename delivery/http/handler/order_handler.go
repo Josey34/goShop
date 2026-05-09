@@ -1,20 +1,29 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/Josey34/goshop/delivery/http/dto/mapper"
 	"github.com/Josey34/goshop/delivery/http/dto/request"
 	"github.com/Josey34/goshop/delivery/http/dto/response"
-	"github.com/Josey34/goshop/service"
+	"github.com/Josey34/goshop/domain/entity"
+	"github.com/Josey34/goshop/domain/valueobject"
+	ucorder "github.com/Josey34/goshop/usecase/order"
 	"github.com/gin-gonic/gin"
 )
 
-type OrderHandler struct {
-	service *service.OrderService
+type orderService interface {
+	CreateOrder(ctx context.Context, input ucorder.CreateOrderInput) (*entity.Order, error)
+	GetByID(ctx context.Context, id string) (*entity.Order, error)
+	ListByCustomer(ctx context.Context, customerID string, pagination valueobject.Pagination) ([]*entity.Order, error)
 }
 
-func NewOrderHandler(svc *service.OrderService) *OrderHandler {
+type OrderHandler struct {
+	service orderService
+}
+
+func NewOrderHandler(svc orderService) *OrderHandler {
 	return &OrderHandler{service: svc}
 }
 
