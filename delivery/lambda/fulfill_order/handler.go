@@ -17,12 +17,8 @@ func NewHandler(uc *ucorder.GetOrderUseCase, updateUC *ucorder.UpdateOrderUseCas
 }
 
 func (h *Handler) Handle(ctx context.Context, event FulfillOrderEvent) (FullfillOrderResponse, error) {
-	o, err := h.getOrderUC.Execute(ctx, event.OrderID)
+	_, err := h.getOrderUC.Execute(ctx, event.OrderID)
 	if err != nil {
-		return FullfillOrderResponse{}, err
-	}
-
-	if err := o.TransitionTo(valueobject.OrderStatusDelivered); err != nil {
 		return FullfillOrderResponse{}, err
 	}
 
