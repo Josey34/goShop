@@ -86,7 +86,7 @@ func (r *OrderRepo) UpdateStatus(ctx context.Context, id string, status valueobj
 func (r *OrderRepo) FindByCustomer(ctx context.Context, customerID string, pagination valueobject.Pagination) ([]*entity.Order, error) {
 	rows, err := r.db.QueryContext(ctx,
 		`SELECT id, customer_id, total, status, created_at, updated_at FROM orders WHERE customer_id = ? LIMIT ? OFFSET ?`,
-		customerID, pagination.Limit, pagination.Offset,
+		customerID, pagination.Limit, pagination.Offset(),
 	)
 	if err != nil {
 		return nil, err
