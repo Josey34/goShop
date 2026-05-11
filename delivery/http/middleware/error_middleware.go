@@ -6,6 +6,7 @@ import (
 
 	domainerrors "github.com/Josey34/goshop/domain/errors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 func ErrorMiddleware() gin.HandlerFunc {
@@ -17,6 +18,12 @@ func ErrorMiddleware() gin.HandlerFunc {
 		}
 
 		err := c.Errors.Last().Err
+
+		var validationErrs validator.ValidationErrors
+		if errors.As(err, &validationErrs) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "validation failed", "fields": validationErrs.Error()})
+			return
+		}
 
 		var domainErr *domainerrors.DomainError
 		if errors.As(err, &domainErr) {
