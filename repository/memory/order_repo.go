@@ -68,10 +68,6 @@ func (r *OrderRepo) UpdateStatus(ctx context.Context, id string, status valueobj
 		return errors.NewNotFound("order", id)
 	}
 
-	if err := o.TransitionTo(status); err != nil {
-		return err
-	}
-
-	r.orders[id] = o
+	o.Status = status
 	return nil
 }
